@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-10-12T20:11:03Z",
+  "id": "cyber-security-information-leakage",
+  "duration": 1,
+  "title": "Insecure Direct Object Reference",
+  "authors": "Phil Smart",
+  "summary": "Information Leakage",
+  "source": "cyber-security-information-leakage.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "cyber-security"
+  ],
+  "url": "cyber-security-information-leakage"
+}

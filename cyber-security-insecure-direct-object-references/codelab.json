@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-10-12T20:09:22Z",
+  "id": "cyber-security-insecure-direct-object-references",
+  "duration": 1,
+  "title": "Insecure Direct Object Reference",
+  "authors": "Marwa Omar",
+  "summary": "Insecure Direct Object Reference",
+  "source": "cyber-security-insecure-direct-object-references.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "cyber-security"
+  ],
+  "url": "cyber-security-insecure-direct-object-references"
+}

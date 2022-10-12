@@ -1,0 +1,113 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Insecure Direct Object Reference</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="cyber-security-insecure-direct-object-references"
+                  title="Insecure Direct Object Reference"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>What is an Insecure Direct Object Reference.</li>
+<li>Finding an Insecure Direct Object Reference.</li>
+<li>Manipulating the Insecure Direct Object Reference.</li>
+<li>Using the Path-Based Insecure Direct Object Reference With Another Reference. <img alt="cwe-idor" src="img/68e8ba2dafa6061a.png"></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Prerequisites" duration="0">
+        <ul>
+<li>Run the java file: <code>java -jar vulnerable-webapp-1.2.0.jar</code></li>
+<li>The default (user-role) username is <code>tjones</code> and the default password is <code>newpassword</code>.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="What is an Insecure Direct Object Reference?" duration="0">
+        <ul>
+<li>Insecure Direct Object References (IDOR) occur when an application provides direct access to objects based on user-supplied input.</li>
+<li>This allows attackers to bypass authorization and access resources directly by modifying the value of a parameter.</li>
+<li>Such resources can be database entries belonging to other users, files in the system, and more. This is caused by the fact that the application takes user-supplied input and uses it to retrieve an object without performing sufficient authorization checks.</li>
+</ul>
+<p class="image-container"><img alt="idor" src="img/49259fcea33c968b.png"></p>
+<p>https://spanning.com/blog/insecure-direct-object-reference-web-based-application-security-part-6/insecure-direct-object-reference-example/</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Finding an Insecure Direct Object Reference" duration="0">
+        <ol type="1">
+<li>Navigate to <code>http://localhost:8080/</code> you should see a login page.</li>
+<li>Login with the default username and password — which is for a user with a <code>user</code> role.</li>
+<li>You should see the home page with three buttons, see Figure 1.</li>
+<li>Click on <code>User Preferences</code></li>
+<li>Take note of the URL in the browser&#39;s address bar  <ul>
+<li>Is this a direct object reference?</li>
+<li>Is this insecure?</li>
+</ul>
+</li>
+</ol>
+<p><img alt="home-page" src="img/575223c94ed0e43d.png"><strong><em>Figure 1. Home Page</em></strong></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Manipulating the Insecure Direct Object Reference" duration="0">
+        <ol type="1">
+<li>Starting from the slide above</li>
+<li>Can you manipulate the URL to reveal sensitive information (breaking confidentiality) of another user?</li>
+</ol>
+<aside class="special"><p>NOTE: This is not always easy to stop using ROLE-based access control. It is entirely possible the other user accounts you can see have the same role. So you need finer-grained access control. Or, the <code>user-prefs</code> page should only be accesible to the user authenticated against the JSESSIONID, so why does that page need a reference at all.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Exploiting the Insecure Direct Object Reference" duration="0">
+        <ol type="1">
+<li>Using information you gathered about another user of the system in the previous slide.</li>
+<li>Navigate to the Password Reset page.</li>
+<li>Inspect the Password Reset page using the browser&#39;s DevTools.</li>
+<li>Take a look at some of the comments (an example of information leakage).</li>
+<li>Can you manipulate the direct object reference in the form post?</li>
+<li>Can you log in as another user?</li>
+</ol>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
