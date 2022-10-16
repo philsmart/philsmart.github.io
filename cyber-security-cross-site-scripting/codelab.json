@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2022-10-16T20:34:26Z",
+  "id": "cyber-security-cross-site-scripting",
+  "duration": 1,
+  "title": "Cross-Site Scripting (XSS)",
+  "authors": "Phil Smart, Marwa Omar",
+  "summary": "Cross-Site Scripting (XSS)",
+  "source": "cyber-security-cross-site-scripting.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "cyber-security"
+  ],
+  "url": "cyber-security-cross-site-scripting"
+}
