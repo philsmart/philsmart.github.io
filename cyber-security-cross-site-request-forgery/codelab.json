@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2023-10-11T15:17:35Z",
+  "id": "cyber-security-cross-site-request-forgery",
+  "duration": 1,
+  "title": "Cross-Site Request Forgery",
+  "authors": "Phil Smart, Marwa Omar",
+  "summary": "Cross-Site Request Forgery",
+  "source": "cyber-security-cross-site-request-forgery.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "cyber-security"
+  ],
+  "tags": [
+    "cyber-security"
+  ],
+  "url": "cyber-security-cross-site-request-forgery"
+}

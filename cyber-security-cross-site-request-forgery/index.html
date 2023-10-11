@@ -1,0 +1,160 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Cross-Site Request Forgery</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="cyber-security-cross-site-request-forgery"
+                  title="Cross-Site Request Forgery"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>What is a Cross-Site Request Forgery (CSRF) attack?</li>
+<li>Cross-Site Request Forgery Mitigations.</li>
+</ul>
+<p class="image-container"><img alt="cwe-csrf" src="img/a031d2b9404041b6.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Prerequisites" duration="0">
+        <ul>
+<li>Run the java file: <code>java -jar vulnerable-webapp-1.2.0.jar</code></li>
+<li>the default username is <code>jblogs</code> and the default password is <code>pa55word</code>.</li>
+<li>Ensure your host file has the following entries:</li>
+</ul>
+<p>Open the <em>hosts</em> file (which is just a text file) as the root account using <code>vi</code> or similar e.g. <strong>sudo vi /etc/hosts</strong> (or you could try xdg-open, if that works e.g. <strong>sudo xdg-open /etc/hosts</strong>)</p>
+<pre><code language="language-bash" class="language-bash"> 127.0.0.1 badsite.ac.uk
+ 127.0.0.1 trustedsite.ac.uk
+</code></pre>
+<p>For example, your <em>hosts</em> file may look like this:</p>
+<p class="image-container"><img alt="host-site-entries" src="img/5fd1a92147c81b79.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="What is Cross-Site Request Forgery (CSRF/XSRF)?" duration="0">
+        <p>Cross-Site Request Forgery (CSRF or XSRF) allows an attacker to forge a malicious cross-origin write request to a targeted web application that invokes sensitive functions on behalf of an authenticated user. Forged requests are usually represented in the form of a hyperlink, zero-width image, in-page JavaScript request, or auto-submitted form post. Some form of social engineering (e.g. a URL to a website in a phishing email), is used by the attacker to trick a victim into unknowingly submitting such a request.</p>
+<p class="image-container"><img alt="cross-site-request-forgery" src="img/83a8541eec4620cd.png"></p>
+<p>https://spanning.com/blog/cross-site-forgery-web-based-application-security-part-2/cross-site-request-forgery-example/</p>
+<p>CSRF exploits existing user session identifiers with ambient authority that are provided automatically by the browsers during each request, e.g. cookies such as the <code>JSESSIONID</code>, or the IP address of the victim. As the attacker has no way of determining/reading the results of that request, useful requests are limited to state-changing, non-idempotent (has side effects) actions that the user is allowed to perform.</p>
+<aside class="special"><p>NOTE: The attacker does <strong><em>NOT</em></strong> have to steal session cookies for this to work. It takes advantage of the browser re-sending some form of ambient authority e.g. session cookies.</p>
+</aside>
+<aside class="special"><p>NOTE: This is NOT about injecting arbitrary scripts to perform malicious actions - although it can be combined with cross-site scripting attacks. It takes advantage of known methods and API calls, with legitimate parameters, but with undesirable variables then have undesirable results.</p>
+</aside>
+<h2 is-upgraded>Example CSRF Attack</h2>
+<ol type="1">
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/</code> you should see a login page.</li>
+<li><strong><em>Do not login.</em></strong></li>
+<li>Navigate to <code>http://badsite.ac.uk:8080/lottery-winners</code></li>
+<li>You should see it present you with a login page.</li>
+<li>Why was that?</li>
+<li>Navigate again to <code>http://trustedsite.ac.uk:8080/</code> and log in using <code>jblogs</code> and <code>pa55word</code></li>
+<li>Navigate to <code>https://badsite.ac.uk:8080/lottery-winners</code></li>
+<li>You will end up on the password reset page.</li>
+<li>Why did it not show you the login page?</li>
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/</code> and click the logout button (top right)</li>
+<li>Try to log in with the original password <code>jblogs</code> and <code>pa55word</code>. Does it work?</li>
+</ol>
+<p>Some kind of phishing attack would be one way of getting the user to click on a hyperlink and visit <code>badsite</code>. You might need to hide the domain name of course e.g.</p>
+<ul>
+<li>Register a similar domain name <code>https://cardiff.org/</code></li>
+<li>Or use a TinyURL</li>
+<li>Or a Homograph phishing attack</li>
+<li>Or simply, just ask them to click on it.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="CSRF Mitigations" duration="0">
+        <p>Now we&#39;ll look at two common mitigations to CSRF attacks.</p>
+<ul>
+<li>Enabling CSRF Tokens.</li>
+<li>Enabling SameSite Cookies.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Enabling CSRF Tokens" duration="0">
+        <p>A CSRF token is a secure random token (e.g., synchronizer token or challenge token) that is used to prevent CSRF attacks. The token needs to be unique per user session and should be a cryptographically strong random value to make it hard to guess.</p>
+<p>The token is embedded by the web-server into HTML pages it controls (e.g., inside HTML forms). It then expects to see the same token in any HTTP request back to the server. The attacker has no way of knowing the token, and so can not send it during the forged request (not even with JavaScript because of the Same-Origin-Policy that prevents JavaScript from reading pages cross-origin). <a href="hhttps://owasp.org/www-community/attacks/csrf" target="_blank">CSRF Token</a>.</p>
+<p>To enable Spring Security&#39;s Synchronizer Token Pattern, run the jar file again with the flag <code>csrfEnabled=true</code> e.g.</p>
+<pre><code language="language-bash" class="language-bash">java -DcsrfEnabled=true -jar vulnerable-webapp-1.2.0-SNAPSHOT.jar
+</code></pre>
+<p>Now, try the following:</p>
+<ol type="1">
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/</code> and log in using <code>jblogs</code> and <code>pa55word</code>.</li>
+<li>Navigate to <code>http://badsite.ac.uk:8080/lottery-winners</code></li>
+<li>You should see a forbidden page, Why was that?</li>
+</ol>
+<p>To see the token that gets embedded on <code>trustedsite</code>:</p>
+<ol type="1">
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/password-reset/</code> (log in if required).</li>
+<li>Right-click and <code>inspect</code> the <em>new password</em> form.</li>
+<li>You should see a hidden input field in the same form as the <code>newPassword</code> input that carries the CSRF token Spring Security generated, e.g.:</li>
+</ol>
+<pre><code language="language-html" class="language-html">&lt;input type=&#34;hidden&#34; name=&#34;_csrf&#34; value=&#34;5f5754bb-eefc-4f5f-9603-911406df1d4f&#34;&gt;
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Enabling SameSite Cookies" duration="0">
+        <p>The reason that Cross-Site Request Forgery occurs is that a form of ambient authority is sent from the browser to the server for each request. In our case — as is true in most cases — this is the `<code>JSESSIONID</code> session cookie. So what if you can limit when the browser sends this cookie?</p>
+<p>You can set the session cookie (<code>JSESSIONID</code>) with the <code>SameSite</code> cookie attribute. Using the value <code>Strict</code> will prevent the browser from sending the session cookie during cross-site <code>POST</code> requests, hence preventing the CSRF attack from <code>http://badsite.ac.uk</code>.</p>
+<aside class="special"><p>Remember that <code>http://badsite.ac.uk</code> is cross-site from <code>http://trustedsite.ac.uk</code>).</p>
+</aside>
+<p>This can be enabled on the application using the <code>sameSiteEnabled=true</code> flag e.g.</p>
+<p><code>bash<br>java -DsameSiteEnabled=true -jar vulnerable-webapp-1.2.0.jar<br></code></p>
+<p>Then:</p>
+<ol type="1">
+<li>Navigate to <code>http://trustedsite.ac.uk:8080/</code> and log in using <code>jblogs</code> and <code>pa55word</code>.</li>
+<li>Navigate to <code>http://badsite.ac.uk:8080/lottery-winners</code></li>
+<li>You should see the login page</li>
+<li>Why was that?  <ul>
+<li>Tip, try to inspect the browser&#39;s <code>Network Tab</code> in the <code>Dev Tools</code> window.  <ul>
+<li>This is tricky, so I can show you this on-screen.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<aside class="special"><p>NOTE: SameSite does not always protect you against attacks from malicious subdomains. You can have a same-site request which is cross-origin (See the slides for the difference between the two). See <code>https://jub0bs.com/posts/2021-01-29-great-samesite-confusion/</code>. So a subdomain takeover (e.g. with XXS) may bypass the SameSite cookie. Hence CSRF tokens are usually stronger or should be used alongside other defenses.</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

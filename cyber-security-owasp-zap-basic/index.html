@@ -1,0 +1,187 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>OWASP ZAP Basic Scan</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/codelab-elements/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="cyber-security-owasp-zap-basic"
+                  title="OWASP ZAP Basic Scan"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Overview" duration="1">
+        <h2 class="checklist" is-upgraded>What You&#39;ll Learn</h2>
+<ul>
+<li>The basic operation of OWASP&#39;s ZAP (Zed Attack Proxy) penetration testing tool.</li>
+<li>How to perform an active scan.  <ul>
+<li>What the Site Tree is</li>
+<li>What the Alerts tab shows</li>
+</ul>
+</li>
+<li>How to manually explore a site.</li>
+<li>How to configure authentication.</li>
+<li>How to discover URLs.</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Prerequisites" duration="1">
+        <p>Zed Attack Proxy (ZAP) is a free, open-source penetration testing tool being maintained under the umbrella of the Open Web Application Security Project (OWASP). ZAP is a manipulator-in-the-middle proxy.</p>
+<ul>
+<li>Run the java file: <code>java -jar vulnerable-webapp-1.5.0.jar</code></li>
+<li>The default username is <code>jblogs</code> and the default password is <code>pa55word</code>.</li>
+<li>Run ZAP (https://www.zaproxy.org/download/)</li>
+</ul>
+<aside class="special"><p>ref: https://www.zaproxy.org/docs/desktop/</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Automated Active Scan (Pre-Authentication)" duration="0">
+        <ul>
+<li>Once ZAP has loaded, you should see the Quick Start addon e.g.</li>
+</ul>
+<p class="image-container"><img alt="zap-quick-start" src="img/7e754032ef171d0a.png"></p>
+<ul>
+<li>Click Automated Scan and type in the URL to attack.  <ul>
+<li>This will be either <code>http://trustedsite.ac.uk:8080/</code> or <code>http://localhost:8080/</code> .</li>
+<li>Then click <code>Attack</code>.</li>
+<li>This will start a spider that explores all the links it can find and reports on the findings from any response it receives.  <ul>
+<li><strong>Remember</strong> it will be blocked by the authentication mechanism from accessing much of the site.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Sites Tree" duration="0">
+        <ul>
+<li>On the left in the Sites Tab you will see a Sites Tree.</li>
+<li>Typically, each node in the tree represents an HTTP method and parameter name</li>
+<li>This is a handy reference to resources on your site</li>
+</ul>
+<p class="image-container"><img src="img/fca242a92d0f2de4.png"></p>
+<aside class="special"><p>ref: https://www.zaproxy.org/docs/desktop/start/features/sitestree/</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Alerts" duration="0">
+        <ul>
+<li>In the bottom pane you will see the Alerts Tab.</li>
+<li>An alert is a potential vulnerability and is associated with a specific request.</li>
+<li>Alerts are flagged by risk — from High (red) to False Positive (Green).</li>
+<li>This is where you will find issues to report on.</li>
+</ul>
+<p class="image-container"><img src="img/69030a7d47742212.png"></p>
+<aside class="special"><p>ref: https://www.zaproxy.org/docs/desktop/start/features/alerts/</p>
+</aside>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Manual Explore" duration="0">
+        <ul>
+<li>As an alternative to automated scanning, you can use the ZAP proxy browser and navigate the site as normal.</li>
+<li>Click on <em>Manual Explore</em> in the Quick Start addon and type in the URL to attack.  <ul>
+<li>This will be either <code>http://trustedsite.ac.uk:8080/</code> or <code>http://localhost:8080/</code></li>
+</ul>
+</li>
+<li>Click Launch Browser.</li>
+<li>A suitably configured version of Firefox should be launched.</li>
+<li>All requests are passed through the ZAP Proxy.</li>
+<li>As you navigate the site, you should see the Sites Tree fill-up with all the requests the browser (and you) are making through the proxy.</li>
+<li>You should be able to log in to the site as normal.  <ul>
+<li><strong>However</strong>, you will not be able to go back to the ZAP UI and run attacks on these resources as the UI uses a different context, and does not immediately have access to the session cookie.</li>
+<li>To use the main UI in an authenticated context, see the next slide.</li>
+</ul>
+</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Authentication and Session Management" duration="0">
+        <ul>
+<li>If you&#39;ve not already, in the Quick Start addon click automated scan and type in the URL to attack.  <ul>
+<li>This will be either <code>http://trustedsite.ac.uk:8080/</code> or <code>http://localhost:8080/</code><br></li>
+</ul>
+</li>
+<li>Click Attack and let it build a basic site map (Pre-Authentication).</li>
+<li>Add the site to the default context in the Sites Tree:</li>
+</ul>
+<p class="image-container"><img src="img/1764968859d003ea.png"></p>
+<ul>
+<li>Now click on the login POST request and flag it as the <em>form-based auth login request</em>:</li>
+</ul>
+<p class="image-container"><img src="img/219052ae590deebe.png"></p>
+<ul>
+<li>Ensure the username parameter and password parameters are <code>username</code> and <code>password</code> respectively.</li>
+<li>Add a success indicator that the application has logged in:</li>
+</ul>
+<p><code>\QWelcome to The Website\E</code></p>
+<ul>
+<li>Add a logged-out indicator:</li>
+</ul>
+<p><code>\QYou have been signed out\E</code></p>
+<p class="image-container"><img src="img/726677ddf50343df.png"></p>
+<ul>
+<li>Now add a valid user:</li>
+</ul>
+<p class="image-container"><img src="img/495ddcd044d67fc.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Authenticated Automated Scan" duration="0">
+        <ul>
+<li>Now you have configured ZAP to login correctly to your application, you can scan the site as the authenticated user <code>jblogs</code>.</li>
+<li>Scan the site using the spider to discover hyperlinks, site pages, and functionality.</li>
+</ul>
+<p class="image-container"><img src="img/5d9c5eec00e4691e.png"></p>
+<ul>
+<li>Ensure you use the correct user and context:</li>
+</ul>
+<p class="image-container"><img src="img/6751a74dfe583c7c.png"></p>
+<ul>
+<li>Once finished, you should see the Site Tree containing the new requests/responses, and a more complete set of alerts in the Alerts tab.</li>
+</ul>
+<p class="image-container"><img src="img/d3e7e9c96ebdc3b4.png"></p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/codelab-elements/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/prettify.js"></script>
+  <script src="https://storage.googleapis.com/codelab-elements/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
